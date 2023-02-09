@@ -29,7 +29,7 @@ pipeline {
         stage("Dockerize") {
             steps {
                 sh "docker build -t $repository ."
-                sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin" // docker hub 로그인
+                sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
                 sh "docker push $repository"
                 sh "docker rmi $repository"
             }
@@ -40,7 +40,7 @@ pipeline {
                   sh "$SSH_CMD 'docker pull $repository'"
                   sh "$SSH_CMD 'docker stop test-container || true'"
                   sh "$SSH_CMD 'docker rm test-container || true'"
-                  sh "$SSH_CMD 'docker run -d --name test-container -p 8080:8080 --env-file=./discovery-service-env-var $repository'"
+                  sh "$SSH_CMD 'docker run -d --name winter-blog-discovery-service -p 8761:8761 --env-file=./discovery-service.env $repository'"
             }
          }
     }
