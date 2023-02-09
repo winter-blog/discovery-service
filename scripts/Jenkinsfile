@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    environment {
+        repository = "alswn4516/winter-blog-discovery-service"
+        DOCKERHUB_CREDENTIALS = credentials('docker_hub_user_credential')
+        dockerImage = ''
+        SSH_CMD = 'ssh -i /var/lib/jenkins/.ssh/jenkins.pem ubuntu@3.34.53.11'
+    }
+
+    stages {
+        stage('checkout') {
+          steps {
+            git branch: 'main',
+                url: 'https://github.com/donghun93/jenkins-ci-cd.git',
+                credentialsId: 'github_access_token_credential'
+            }
+        }
+
+        stage('Gradle Build') {
+          steps {
+                sh "chmod +x gradlew"
+                sh """
+                   ./gradlew build bootJar
+                   """
+            }
+        }
+
+        stage("Dockerize") {
+            steps {
+                sh "docker build -t $repository ."
+                sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin" // docker hub 로그인
+                sh "docker push $repository"
+                sh "docker rmi $repository"
+            }
+        }
+
+         stage("Deploy to EC2") {
+            steps {
+                  sh "$SSH_CMD 'docker pull $repository'"
+                  sh "$SSH_CMD 'docker stop test-container || true'"
+                  sh "$SSH_CMD 'docker rm test-container || true'"
+                  sh "$SSH_CMD 'docker run -d --name test-container -p 8080:8080 --env-file=./discovery-service-env-var $repository'"
+            }
+         }
+    }
+}
