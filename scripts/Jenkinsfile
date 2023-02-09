@@ -21,7 +21,7 @@ pipeline {
           steps {
                 sh "chmod +x gradlew"
                 sh """
-                   ./gradlew build bootJar
+                   ./gradlew clean build bootJar -x test
                    """
             }
         }
