@@ -2,17 +2,20 @@ pipeline {
     agent any
 
     environment {
+        EXTERNAL_PORT = 8761
+        INTERNAL_PORT = 8761
         repository = "alswn4516/winter-blog-discovery-service"
         DOCKERHUB_CREDENTIALS = credentials('docker_hub_user_credential')
-        dockerImage = ''
         SSH_CMD = 'ssh -i /var/lib/jenkins/.ssh/jenkins.pem ubuntu@3.34.53.11'
+        ENV_FILE = '--env-file=./env/discovery-service.env'
+        DOCKER_CONTAINER_NAME = 'winter-blog-discovery-service'
     }
 
     stages {
         stage('checkout') {
           steps {
             git branch: 'develop',
-                url: 'https://github.com/donghun93/jenkins-ci-cd.git',
+                url: 'https://github.com/winter-blog/discovery-service.git',
                 credentialsId: 'github_access_token_credential'
             }
         }
@@ -38,9 +41,9 @@ pipeline {
          stage("Deploy to EC2") {
             steps {
                   sh "$SSH_CMD 'docker pull $repository'"
-                  sh "$SSH_CMD 'docker stop test-container || true'"
-                  sh "$SSH_CMD 'docker rm test-container || true'"
-                  sh "$SSH_CMD 'docker run -d --name winter-blog-discovery-service -p 8761:8761 --env-file=./discovery-service.env $repository'"
+                  sh "$SSH_CMD 'docker stop $DOCKER_CONTAINER_NAME || true'"
+                  sh "$SSH_CMD 'docker rm $DOCKER_CONTAINER_NAME || true'"
+                  sh "$SSH_CMD 'docker run -d --name $DOCKER_CONTAINER_NAME -p $EXTERNAL_PORT:$INTERNAL_PORT $ENV_FILE $repository'"
             }
          }
     }
