@@ -47,7 +47,6 @@ pipeline {
 
          stage("Deploy to EC2") {
             steps {
-                  sh "sudo su - root"
                   sh "$SSH_CMD 'docker pull $repository'"
                   sh "$SSH_CMD 'docker stop $DOCKER_CONTAINER_NAME || true'"
                   sh "$SSH_CMD 'docker rm $DOCKER_CONTAINER_NAME || true'"
