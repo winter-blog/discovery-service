@@ -14,7 +14,7 @@ pipeline {
         EXTERNAL_PORT = 8761
         INTERNAL_PORT = 8761
         
-        SSH_CMD = 'ssh -i /var/lib/jenkins/.ssh/jenkins.pem ubuntu@13.125.69.235'
+        SSH_CMD = 'ssh -i /var/lib/jenkins/.ssh/jenkins.pem ubuntu@3.39.159.26'
         ENV_FILE = '--env-file=./env/discovery-service.env'
         NETWORK = '--net winter-blog-network'
     }
