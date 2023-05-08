@@ -17,6 +17,8 @@ pipeline {
         SSH_CMD = 'ssh -i /var/lib/jenkins/.ssh/jenkins.pem ubuntu@3.39.159.26'
         ENV_FILE = '--env-file=./env/discovery-service.env'
         NETWORK = '--net winter-blog-network'
+
+        DISCORD_WEBHOOK_URL = credentials("discord_webhook")
     }
 
     stages {
@@ -56,4 +58,21 @@ pipeline {
             }
          }
     }
+    
+    post {
+            success {
+                discordSend title: "Discovery Service CI/CD 알림",
+                            description: "discovery-service CI/CD 결과",
+                            footer: "discovery-service 빌드 및 배포에 성공했습니다.",
+                            link: env.BUILD_URL, result: currentBuild.currentResult,
+                            webhookURL: env.DISCORD_WEBHOOK_URL
+            }
+            failure {
+                discordSend title: "Discovery Service CI/CD 알림",
+                            description: "discovery-service CI/CD 결과",
+                            footer: "discovery-service 빛드 및 배포에 실패했습니다.",
+                            link: env.BUILD_URL, result: currentBuild.currentResult,
+                            webhookURL: env.DISCORD_WEBHOOK_URL
+            }
+     }
 }
